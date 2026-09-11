@@ -447,6 +447,20 @@ func GetChannelById(id int, selectAll bool) (*Channel, error) {
 	return channel, nil
 }
 
+func GetChannelByAlias(alias string, selectAll bool) (*Channel, error) {
+	channel := &Channel{}
+	var err error
+	if selectAll {
+		err = DB.Where("remark LIKE ?", "%[alias="+alias+"]%").First(channel).Error
+	} else {
+		err = DB.Omit("key").Where("remark LIKE ?", "%[alias="+alias+"]%").First(channel).Error
+	}
+	if err != nil {
+		return nil, err
+	}
+	return channel, nil
+}
+
 func BatchInsertChannels(channels []Channel) error {
 	if len(channels) == 0 {
 		return nil

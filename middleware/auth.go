@@ -526,8 +526,12 @@ func SetupContextForToken(c *gin.Context, token *model.Token, parts ...string) e
 		if model.IsAdmin(token.UserId) {
 			id, err := strconv.Atoi(parts[1])
 			if err != nil {
-				abortWithOpenAiMessage(c, http.StatusBadRequest, i18n.T(c, i18n.MsgDistributorInvalidChannelId))
-				return fmt.Errorf("invalid specific channel id")
+				aliasChannel, aliasErr := model.GetChannelByAlias(parts[1], false)
+				if aliasErr != nil {
+					abortWithOpenAiMessage(c, http.StatusBadRequest, i18n.T(c, i18n.MsgDistributorInvalidChannelId))
+					return fmt.Errorf("invalid specific channel id")
+				}
+				id = aliasChannel.Id
 			}
 			service.GetChannelConstraints(c).AddPin(dto.ChannelPin{
 				ChannelId: id,
